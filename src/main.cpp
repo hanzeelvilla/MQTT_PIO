@@ -17,30 +17,36 @@ void setupWifi() {
     delay(1000);
     Serial.print(".");
   }
-
+  /*
   Serial.print("\nConnected to: ");
   Serial.println(SSID);
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
+  */
 }
 
 void reconnect() {
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    if (client.connect("ESP32Client")) {  // Change the client ID to something unique
-      Serial.print(" Connected to: ");
-      Serial.print(BROKER);
-      client.subscribe(RX_TOPIC);
-      Serial.print(" Subscribed to: ");
-      Serial.println(RX_TOPIC);
-    } 
-    else {
-      Serial.print(" failed, rc= ");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000);
+  if (!client.connected()) {
+    while (!client.connected()) {
+      Serial.print("Attempting MQTT connection...");
+
+      if (client.connect("ESP32Client")) { // c
+        Serial.print(" Connected to: ");
+        Serial.print(BROKER);
+        client.subscribe(RX_TOPIC);
+        Serial.print(" Subscribed to: ");
+        Serial.println(RX_TOPIC);
+      } 
+      else {
+        Serial.print(" failed, rc= ");
+        Serial.print(client.state());
+        Serial.println(" try again in 5 seconds");
+        delay(5000);
+      }
     }
   }
+
+  client.loop();
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -55,14 +61,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void setup() {
   Serial.begin(115200);
+
   setupWifi();
   client.setServer(BROKER, PORT);
   client.setCallback(callback);
 }
 
 void loop() {
-  if (!client.connected()) {
-    reconnect();
-  }
-  client.loop();
+  delay(10);
+  reconnect();
 }
