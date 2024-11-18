@@ -6,6 +6,8 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+long currenTime, lasTime;
+
 void setupWifi() {
   delay(1000);
   Serial.print("Connecting to: ");
@@ -17,12 +19,11 @@ void setupWifi() {
     delay(1000);
     Serial.print(".");
   }
-  /*
+  
   Serial.print("\nConnected to: ");
   Serial.println(SSID);
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
-  */
 }
 
 void reconnect() {
@@ -30,7 +31,7 @@ void reconnect() {
     while (!client.connected()) {
       Serial.print("Attempting MQTT connection...");
 
-      if (client.connect("ESP32Client")) { // c
+      if (client.connect("ESP32Client")) { // change the client ID to something unique
         Serial.print(" Connected to: ");
         Serial.print(BROKER);
         client.subscribe(RX_TOPIC);
@@ -70,4 +71,12 @@ void setup() {
 void loop() {
   delay(10);
   reconnect();
+
+  currenTime = millis();
+  if (currenTime - lasTime > 5000) {
+    lasTime = currenTime;
+
+    client.publish(TX_TOPIC, "Hola nena");
+    Serial.println("Publishing message...");
+  }
 }
